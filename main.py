@@ -1,11 +1,12 @@
-from os import system, path
+from os import system
+from os.path import join
 from gc import collect
 from pandas import read_csv
 from openpyxl import load_workbook
 
 class ws_handle(object):
     def __init__(self, wb_dir, wb_name, ws_name):
-        wb = load_workbook(path.join(wb_dir, wb_name), data_only=True)
+        wb = load_workbook(join(wb_dir, wb_name), data_only=True)
         self.ws = wb[ws_name]
         del wb
         collect()
@@ -20,9 +21,9 @@ class ws_handle(object):
                     print(cell.value)
                     target_found = False
                     if match_case:
-                        target_found = target in cell.value
-                    else:
                         target_found = target == cell.value
+                    else:
+                        target_found = target in cell.value
                     if target_found:
                         not_merged_cell = True
                         for merged_cell in self.ws.merged_cells:
