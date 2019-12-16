@@ -4,86 +4,105 @@ from gc import collect
 from pandas import read_csv
 from openpyxl import load_workbook
 
-class ws_handle(object):
-    def __init__(self, wb_dir, wb_name, ws_name):
-        wb = load_workbook(join(wb_dir, wb_name), data_only=True)
-        self.ws = wb[ws_name]
-        del wb
-        collect()
-        #print(self.ws)
+class coor_handler(object):
+	def __init__(self, ws, target, match_case:bool=False):
+		self.ws = ws
+		self.IsMergedCell = False
+		coor_temp = self.coor_get(ws, target, match_case)
+		if coor_temp != None:
+			self.CoorAvailable = True
+			self.assign_coor(coor_temp)
+		else:
+			self.CoorAvailable = False
+		self.Value = self.get_cell_value(ws)
+		print(self.Value, type(self.Value))
 
-    def coor_find_cell(self, target, match_case:bool=False, find_all:bool=False):
-        return_coor = []
-        # If target is string type
-        if isinstance(target, str):
-            for rows in self.ws:
-                for cell in rows:
-                    print(cell.value)
-                    target_found = False
-                    if match_case:
-                        target_found = target == cell.value
-                    else:
-                        target_found = target in cell.value
-                    if target_found:
-                        not_merged_cell = True
-                        for merged_cell in self.ws.merged_cells:
-                            if (cell.coordinate in merged_cell):
-                                temp = (merged_cell.bounds[0], merged_cell.bounds[1],
-                                        merged_cell.bounds[2], merged_cell.bounds[3])
-                                not_merged_cell = False
-                                if find_all:
-                                    return_coor.append(temp)
-                                else:
-                                    return tuple(temp)
-                        if not_merged_cell:
-                            temp = (cell.column,
-                                    cell.row,
-                                    cell.column,
-                                    cell.row)
-                            if find_all:
-                                return_coor.append(temp)
-                            else:
-                                return tuple(temp)
-        # If target is list type, list format [column, row]
-        elif isinstance(target, list):
-            # list  = [col, row]
-            coor = self.ws.cell(column=target[0], row=target[1]).coordinate
-            not_merged_cell = True
-            for merged_cell in self.ws.merged_cells:
-                if (coor in merged_cell):
-                    temp = {merged_cell.bounds[0], merged_cell.bounds[1],
-                            merged_cell.bounds[2], merged_cell.bounds[3]}
-                    not_merged_cell = False
-                    return tuple(temp)
-            if not_merged_cell:
-                temp = {target[0], target[1],
-                        target[0], target[1]}
-                return tuple(temp)
-        return return_coor
+	def assign_coor(self, coor):
+		self.FirstColumn = coor[0]
+		self.FirstRow = coor[1]
+		self.LastColumn = coor[2]
+		self.LastRow = coor[3]
 
-    def debug(self):
-        print(self.coor_find_cell("#", match_case=True))
-        print(self.coor_find_cell("Input factor", match_case=True))
+	def coor_get(self, target, match_case:bool=False):
+		def coor_merged_cell(cell):
+			for merged_cell in self.ws.merged_cells:
+				if (cell.coordinate in merged_cell):
+					temp = (merged_cell.bounds[0], merged_cell.bounds[1],
+							merged_cell.bounds[2], merged_cell.bounds[3])
+					self.IsMergedCell = True
+					return temp
+			else:
+				temp = (cell.column, cell.row, cell.column, cell.row)
+				self.IsMergedCell = False
+				return temp
+
+		if isinstance(target, str):
+			for rows in self.ws:
+				for cell in rows:
+					cell_value = str(cell.value)
+					if ((target == cell_value) if match_case else (target in cell_value)):
+						return coor_merged_cell(cell)
+		elif isinstance(target, list):
+			cell = self.ws.cell(column=target[0], row=target[1])
+			return coor_merged_cell(cell)
+		else:
+			print(f"target {target} is not str or list")
+		return None
+
+	def get_cell_value(self)->str:
+		return str(self.ws.cell(column=self.FirstColumn, row=self.FirstRow).value)
+
+	def coor_shift_up(self):
+		temp = self.FirstRow - 1
+		temp = [self.FirstColumn, 1 if temp < 1 else temp]
+		temp = self.coor_get(temp)
+		self.assign_coor(temp)
+
+	def coor_shift_down(self):
+		temp = [self.FirstColumn, self.LastRow + 1]
+		temp = self.coor_get(temp)
+		self.assign_coor(temp)
+
+	def coor_shift_left(self):
+		temp = self.FirstColumn - 1
+		temp = [1 if temp < 1 else temp, self.FirstRow]
+		temp = self.coor_get(temp)
+		self.assign_coor(temp)
+
+	def coor_shift_right(self):
+		temp = [self.LastColumn + 1, self.FirstRow]
+		temp = self.coor_get(temp)
+		self.assign_coor(temp)
 
 def main():
-    def extract_data(x):
-        return x["implement"], x["workbook_dir"], x["workbook_name"], x["worksheet_name"]
+	def ws_get(wb_dir, wb_name, ws_name):
+		wb = load_workbook(join(wb_dir, wb_name), data_only=True)
+		return wb[ws_name]
+	def extract_data(x):
+		return x["implement"], x["workbook_dir"], x["workbook_name"], x["worksheet_name"]
 
-    config_df = read_csv("config.csv", index_col="no")
-    #print(config_df)
+	config_df = read_csv("config.csv", index_col="no")
+	#print(config_df)
 
-    i = 0
-    while True:
-        try:
-            imp, wb_dir, wb_name, ws_name = extract_data(config_df.iloc[i])
-            print(imp, wb_dir, wb_name, ws_name)
-            if ("yes" == imp):
-                ws_obj = ws_handle(wb_dir, wb_name, ws_name)
-                ws_obj.debug()
-            i += 1
-        except:
-            break
+	i = 0
+	while True:
+		try:
+			imp, wb_dir, wb_name, ws_name = extract_data(config_df.iloc[i])
+			print(imp, wb_dir, wb_name, ws_name)
+			if ("yes" == imp):
+				ws = ws_get(wb_dir, wb_name, ws_name)
+				coor_temp = coor_handler(ws, "Input factor")
+				if (coor_temp.CoorAvailable):
+					print(coor_temp.FirstColumn, coor_temp.FirstRow)
+					print(coor_temp.LastColumn, coor_temp.LastRow)
+				else:
+					print("coor not available")
+				coor_temp = coor_handler(ws, [1, 1])
+				print(coor_temp.FirstColumn, coor_temp.FirstRow)
+				print(coor_temp.LastColumn, coor_temp.LastRow)
+			i += 1
+		except:
+			break
 
 if __name__ == "__main__":
-    #system("cls")
-    main()
+	main()
