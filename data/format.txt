@@ -1,0 +1,26 @@
+void test_{func}(){
+	struct CPPTH_LOOP_INPUT_STRUCT {
+		/* Test case data declarations */
+		char* name;
+		char* description;
+		char* expected_calls;
+		int execute;
+		{data_declarations}
+		{return_data_declarations}
+	};
+	{expected_return_data_declarations}
+	/* Import external data declarations */
+	#include "test_{func}.h"
+	{external_data_declarations}
+	START_TEST_LOOP();
+		/* Expected Call Sequence  */
+		EXPECTED_CALLS(CURRENT_TEST.expected_calls);
+			{external_data_initialize}
+			/* Call SUT */
+			{expected_return_assign}{func}({argument});
+			/* Test case checks */
+			{expected_data_check}
+			{expected_return_check}
+		END_CALLS();
+	END_TEST_LOOP();
+}
