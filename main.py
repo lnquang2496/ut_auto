@@ -72,7 +72,7 @@ class cell(object):
 		self.find_cell(temp)
 
 	def coor_print(self):
-		print(self.first_col, self.first_row, self.last_col, self.last_col, self.merged_cell, self.value, sep="\t")
+		print(self.first_col, self.first_row, self.last_col, self.last_col, self.value, sep="\t")
 
 class testcase(object):
 	def __init__(self, ws, target):
@@ -96,28 +96,53 @@ class testcase(object):
 class inoutput_handler(object):
 	def __init__(self, ws):
 		self.ws = ws
-
-		def is_pointer(value):
-			with open("data/pointer.txt", "r") as f:
-				for l in f:
-					l = l.rstrip("\n")
-					if l != "*":
-						l += " "
-					if l in value:
-						return True
-				else:
-					return False
-
-		def is_structure(value):
-			with open("data/structure.txt", "r") as f:
-				for l in f:
-					l = l.rstrip("\n")
+		self.list_obj = []
+		obj_testcase = testcase(self.ws, "#")
+		obj_input = cell(self.ws, "Input factor")
+		obj_output = cell(self.ws, "Output element")
+		self.get_info(obj_input)
+	@staticmethod
+	def is_pointer(value):
+		with open("data/pointer.txt", "r") as f:
+			for l in f:
+				l = l.rstrip("\n")
+				if l != "*":
 					l += " "
-					if l in value:
-						return True
-						break
-				else:
-					return False
+				if l in value:
+					return True
+			else:
+				return False
+	@staticmethod
+	def is_structure(value):
+		with open("data/structure.txt", "r") as f:
+			for l in f:
+				l = l.rstrip("\n")
+				l += " "
+				if l in value:
+					return True
+					break
+			else:
+				return False
+
+	class obj_argument(object):
+		def __init__(self, ws, obj):
+			cell_value = obj.value
+			self.name = ""
+			self.pointer = False
+			self.structure = False
+			self.init_value = 0
+
+		def data_extract(self, value):
+			
+
+	def get_info(self, obj):
+		obj_1 = cell(self.ws, obj)
+		obj_1.coor_shift_down()
+		while obj_1.last_col <= obj.last_col:
+			if "[a]" in obj_1.value:
+				obj_1.coor_print()
+				
+			obj_1.coor_shift_right()
 		"""
 		def inoutput_search(obj, row_testcase):
 			obj_1 = cell(self.ws, obj)
@@ -144,6 +169,8 @@ class inoutput_handler(object):
 		obj_output = cell(self.ws, "Output element")
 		for r in range(obj_testcase.first_tc_row, obj_testcase.last_tc_row + 1):
 			inoutput_search(obj_output, r)
+		"""
+
 		"""
 		def input_search(obj, row):
 			def structure_search(obj, row):
@@ -180,6 +207,8 @@ class inoutput_handler(object):
 		obj_input = cell(self.ws, "Input factor")
 		for r in range(obj_testcase.first_tc_row, obj_testcase.last_tc_row + 1):
 			input_search(obj_input, r)
+		"""
+
 
 def main():
 	def ws_get(wb_dir, wb_name, ws_name):
