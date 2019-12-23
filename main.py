@@ -19,7 +19,7 @@ class cell(object):
 	def find_cell(self, target, match_case:bool=False):
 		def coor_merged_cell(cell):
 			for merged_cell in self.ws.merged_cells:
-				if (cell.coordinate in merged_cell):
+				if cell.coordinate in merged_cell.coord:
 					temp = (merged_cell.bounds[0], merged_cell.bounds[1],
 							merged_cell.bounds[2], merged_cell.bounds[3])
 					self.merged_cell = True
@@ -102,6 +102,11 @@ class testcase(object):
 		print("total tc     : ", self.total_tc)
 		print("--------------")
 
+class inoutput_handler(object):
+	def __init__(ws, target, match_case:bool=False):
+		
+		pass
+
 def main():
 	def ws_get(wb_dir, wb_name, ws_name):
 		wb = load_workbook(join(wb_dir, wb_name), data_only=True)
@@ -111,19 +116,14 @@ def main():
 
 	config_df = read_csv("config.csv", index_col="no")
 
-	i = 0
-	while True:
-		try:
-			imp, wb_dir, wb_name, ws_name = extract_data(config_df.iloc[i])
-			print(imp, wb_dir, wb_name, ws_name)
-			if ("yes" == imp):
-				ws = ws_get(wb_dir, wb_name, ws_name)
-				coor_temp = cell(ws, "Input factor")
-				tc_obj = testcase(ws, "#")
-				tc_obj.testcase_print()
-			i += 1
-		except:
-			break
+	for i in range(config_df._AXIS_LEN):
+		imp, wb_dir, wb_name, ws_name = extract_data(config_df.iloc[i])
+		print(imp, wb_dir, wb_name, ws_name)
+		if ("yes" == imp):
+			ws = ws_get(wb_dir, wb_name, ws_name)
+			coor_temp = cell(ws, "Input factor")
+			coor_temp.coor_print()
+			tc_obj = testcase(ws, "#")
 
 if __name__ == "__main__":
 	start = time()
