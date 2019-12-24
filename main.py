@@ -125,23 +125,31 @@ class inoutput_handler(object):
 				return False
 
 	class obj_argument(object):
-		def __init__(self, ws, obj):
-			cell_value = obj.value
+		def __init__(self, ws, value):
+			self.declare = value
+			self.type = ""
 			self.name = ""
 			self.pointer = False
 			self.structure = False
 			self.init_value = 0
+			self.check_expected = False
+			self.data_extract(value)
 
 		def data_extract(self, value):
-			
+			temp_value = value
+			if inoutput_handler.is_pointer(value):
+				self.pointer = True
+				temp_value = value.replace("*", "")
+			self.type, self.name = temp_value.split()
 
 	def get_info(self, obj):
 		obj_1 = cell(self.ws, obj)
 		obj_1.coor_shift_down()
 		while obj_1.last_col <= obj.last_col:
 			if "[a]" in obj_1.value:
+				temp_value = obj_1.value.replace("[a]", "")
+				obj_cell = self.obj_argument(self.ws, temp_value)
 				obj_1.coor_print()
-				
 			obj_1.coor_shift_right()
 		"""
 		def inoutput_search(obj, row_testcase):
