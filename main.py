@@ -93,6 +93,49 @@ class testcase(object):
 			coor.coor_shift_down()
 		self.last_tc_row = coor.first_row - 1
 
+def is_pointer(value):
+	with open("data/pointer.txt", "r") as f:
+		for l in f:
+			l = l.rstrip("\n")
+			if l != "*":
+				l += " "
+			if l in value:
+				return l
+		else:
+			return None
+def is_structure(value):
+	with open("data/structure.txt", "r") as f:
+		for l in f:
+			l = l.rstrip("\n")
+			l += " "
+			if l in value:
+				return l
+		else:
+			return None
+
+def is_array(value):
+	if ("[" in value) and ("]" in value):
+		return value[value.find("[") : value.find("]") + 1]
+	else:
+		return None
+
+class cell_attribute:
+	pass
+
+def temp(obj):
+	declare = obj.value.replace("[a]", "")
+	pointer = is_pointer(declare)
+	structure = is_structure(declare)
+	array = is_array(declare)
+	temp = declare
+	if pointer:
+		temp = declare.replace(pointer, "")
+	if structure:
+		temp = declare.replace(structure, "")
+	if array:
+		temp = declare.replace(array, "")
+	print(temp)
+
 class inoutput_handler(object):
 	def __init__(self, ws):
 		self.ws = ws
@@ -101,28 +144,6 @@ class inoutput_handler(object):
 		obj_input = cell(self.ws, "Input factor")
 		obj_output = cell(self.ws, "Output element")
 		self.get_info(obj_input)
-	@staticmethod
-	def is_pointer(value):
-		with open("data/pointer.txt", "r") as f:
-			for l in f:
-				l = l.rstrip("\n")
-				if l != "*":
-					l += " "
-				if l in value:
-					return True
-			else:
-				return False
-	@staticmethod
-	def is_structure(value):
-		with open("data/structure.txt", "r") as f:
-			for l in f:
-				l = l.rstrip("\n")
-				l += " "
-				if l in value:
-					return True
-					break
-			else:
-				return False
 
 	class obj_argument(object):
 		def __init__(self, ws, value):
@@ -232,7 +253,14 @@ def main():
 		print(imp, wb_dir, wb_name, ws_name, sep="\t")
 		if ("yes" == imp):
 			ws = ws_get(wb_dir, wb_name, ws_name)
-			obj = inoutput_handler(ws)
+			#obj = inoutput_handler(ws)
+			obj_input = cell(ws, "Input factor")
+			obj_1 = cell(ws, obj_input)
+			obj_1.coor_shift_down()
+			while obj_1.last_col <= obj_input.last_col:
+				if ("[a]" in obj_1.value):
+					temp(obj_1)
+				obj_1.coor_shift_right()
 
 if __name__ == "__main__":
 	start = time()
