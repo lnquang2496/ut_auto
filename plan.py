@@ -1,9 +1,11 @@
 from openpyxl import load_workbook
+from time import time
+
+class 
+class cell:
+	pass
 
 def get_worksheet_data(wb_name, ws_name):
-	wb = load_workbook(wb_name, True, False, True, False)
-	rows = tuple(wb[ws_name].rows)
-
 	def get_worksheet_pcl(rows):
 		temp_x_start, temp_x_end = 999999, 999999
 		temp_y_start, temp_y_end = 999999, 999999
@@ -18,7 +20,11 @@ def get_worksheet_data(wb_name, ws_name):
 				if "Judgment" == col.value:
 					temp_x_end = x
 				if x >= temp_x_start and x <= temp_x_end:
-					temp_row.append(str(col.value))
+					temp_obj = cell()
+					temp_obj.value = str(col.value)
+					temp_obj.col = x - temp_x_start
+					temp_obj.row = y - temp_y_start
+					temp_row.append(temp_obj)
 					if None == col.value:
 						temp_empty_row += 1
 			if temp_empty_row == (temp_x_end - temp_x_start + 1):
@@ -27,8 +33,21 @@ def get_worksheet_data(wb_name, ws_name):
 				temp_rows.append(temp_row)
 		return tuple(temp_rows)
 	
-	rows = get_worksheet_pcl(rows)
+	def get_testcase_info(rows):
+		temp_flag = True
+		for y, row in enumerate(rows):
+			if "-" in row[0] and temp_flag:
+				tcfirst_row = y
+				temp_flag = False
+		tclast_row = y
 
+
+
+	wb = load_workbook(wb_name, True, False, True, False)
+	rows = get_worksheet_pcl(tuple(wb[ws_name].rows))
+	print()
+
+	"""
 	def get_testcase(rows):
 		temp_testcase = []
 		for y, row in enumerate(rows):
@@ -53,8 +72,6 @@ def get_worksheet_data(wb_name, ws_name):
 					temp_row.append(col)
 			temp_rows.append(temp_row)
 		return tuple(temp_rows)
-	
-	get_input_factor(rows)
 
 	def get_output_element(rows):
 		temp_x_start, temp_x_end = 999999, 999999
@@ -70,7 +87,9 @@ def get_worksheet_data(wb_name, ws_name):
 					temp_row.append(col)
 			temp_rows.append(temp_row)
 		return tuple(temp_rows)
-	get_output_element(rows)
-	pass
+	"""
 
+start = time()
 get_worksheet_data("d:/ut_auto/data/test.xlsx", "Sheet1")
+end = time()
+print((end - start) * 1000, "ms")
