@@ -1,37 +1,67 @@
 from openpyxl import load_workbook
 from time import time
 
-class 
+class pcl:
+	def __init__(self, wb_name, ws_name):
+		def get_pcl_from_worksheet(rows):
+			class cell:
+				def __init__(self):
+					self.col = -1
+					self.row = -1
+					self.value = None
+				pass
+			temp_x_start, temp_x_end = 999999, 999999
+			temp_y_start, temp_y_end = 999999, 999999
+			temp_rows = []
+			for y, row in enumerate(rows):
+				temp_row = []
+				temp_empty_row = 0
+				for x, col in enumerate(row):
+					if "#" == col.value:
+						temp_x_start = x
+						temp_y_start = y
+					if "Judgment" == col.value:
+						temp_x_end = x
+					if x >= temp_x_start and x <= temp_x_end:
+						temp_obj = cell()
+						temp_obj.col = x - temp_x_start
+						temp_obj.row = y - temp_y_start
+						temp_obj.value = str(col.value)
+						temp_row.append(temp_obj)
+						if None == col.value:
+							temp_empty_row += 1
+				if temp_empty_row == (temp_x_end - temp_x_start + 1):
+					temp_y_end = y
+				if y >= temp_y_start and y < temp_y_end:
+					temp_rows.append(temp_row)
+			return tuple(temp_rows)
+
+		wb = load_workbook(wb_name, True, False, True, False)
+		rows = get_pcl_from_worksheet(tuple(wb[ws_name].rows))
+
+		def get_pcl_info():
+
+	class pcl_info:
+		def __init__(self):
+			self.tcfirst_row = -1
+			self.tclast_row = -1
+			self.initval_row = -1
+			self.imp_available = False
+			self.imp_first_col = -1
+			self.imp_last_col = -1
+			self.out_available = False
+			self.out_first_col = -1
+			self.out_last_col = -1
+		pass
+
+	
+
+
+
 class cell:
 	pass
 
 def get_worksheet_data(wb_name, ws_name):
-	def get_worksheet_pcl(rows):
-		temp_x_start, temp_x_end = 999999, 999999
-		temp_y_start, temp_y_end = 999999, 999999
-		temp_rows = []
-		for y, row in enumerate(rows):
-			temp_row = []
-			temp_empty_row = 0
-			for x, col in enumerate(row):
-				if "#" == col.value:
-					temp_x_start = x
-					temp_y_start = y
-				if "Judgment" == col.value:
-					temp_x_end = x
-				if x >= temp_x_start and x <= temp_x_end:
-					temp_obj = cell()
-					temp_obj.value = str(col.value)
-					temp_obj.col = x - temp_x_start
-					temp_obj.row = y - temp_y_start
-					temp_row.append(temp_obj)
-					if None == col.value:
-						temp_empty_row += 1
-			if temp_empty_row == (temp_x_end - temp_x_start + 1):
-				temp_y_end = y
-			if y >= temp_y_start and y < temp_y_end:
-				temp_rows.append(temp_row)
-		return tuple(temp_rows)
 	
 	def get_testcase_info(rows):
 		temp_flag = True
