@@ -21,8 +21,8 @@ void test_{func}(){
     };
     {expected_return_data_declarations}
     int32_t ReturnValue;
-    struct abc var_abc;
     uint32_t var3;
+    struct abc var_abc;
     int32_t var5;
     struct def var_def;
     int32_t var7;
