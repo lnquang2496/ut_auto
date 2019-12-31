@@ -68,9 +68,11 @@ void test_{func}(){
             ReturnValue = {func}(var1, var2, var3, var_abc);
             /* Test case checks */
             {expected_data_check}
-
+            CHECK_U_INT(var3, CURRENT_TEST.expected_var3);
+            CHECK_I_INT();
+            CHECK_
             {expected_return_check}
-            CHECK_S_INT(ReturnValue , expected_ReturnValue);
+            CHECK_S_INT(ReturnValue , CURRENT_TEST.expected_ReturnValue);
         END_CALLS();
     END_TEST_LOOP();
 }

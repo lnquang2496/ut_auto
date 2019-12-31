@@ -1,7 +1,6 @@
 def export_test_program(pcl):
 	def element_child_handle(child):
 		for element in child:
-			print(element.name)
 			if element.is_structure and not element.is_pointer and not element.parent:
 				tab = "\t\t"
 				f_expected_return_data_declarations.write(f"{tab}{element.type} {element.name};\n")
@@ -15,7 +14,10 @@ def export_test_program(pcl):
 					f_external_data_initialize.write(f"{tab}if (CURRENT_TEST.{element.name} != NULL) {{\n{tab}\tCURRENT_TEST.{element.name} = &{element.name};\n{tab}}}\n")
 				if element.parent:
 					tab = "\t\t\t"
-					f_external_data_initialize.write(f"{tab}{element.parent}.{element.name} = CURRENT_TEST.{element.name};\n")
+					temp = ""
+					for data in element.parent:
+						temp += f"{data}."
+					f_external_data_initialize.write(f"{tab}{temp}{element.name} = CURRENT_TEST.{element.name};\n")
 			else:
 				element_child_handle(element.child)
 

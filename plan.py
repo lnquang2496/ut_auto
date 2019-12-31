@@ -39,6 +39,8 @@ class pcl:
 					temp_y_end = y
 				if y >= temp_y_start and y < temp_y_end:
 					temp_rows.append(temp_row)
+				elif y >= temp_y_end:
+					break
 			return tuple(temp_rows)
 
 		def get_pcl_info(rows):
@@ -126,8 +128,10 @@ class pcl:
 				self.name = None
 				self.is_pointer = False
 				self.is_structure = False
-				self.parent = None
+				self.is_array = False
+				self.parent = []
 				self.child = None
+				self.check_expected = None
 				pass
 
 		def is_pointer(value):
@@ -158,7 +162,7 @@ class pcl:
 				return None
 
 		def get_element_info(initval_row, current_cell):
-			def get_variable_info(current_cell, prefix="", parent=None):
+			def get_variable_info(current_cell, prefix="", parent:list=[]):
 				temp_cell_value = current_cell.value.replace(prefix, "")
 				obj_element_info = element_info()
 				obj_element_info.cell_info = current_cell
@@ -177,6 +181,7 @@ class pcl:
 
 				obj_element_info.name = temp_cell_value[temp_cell_value.rfind(" ") + 1 :].replace(" ", "")
 				obj_element_info.type = temp_cell_value[: temp_cell_value.rfind(" ")]
+				obj_element_info.parent = parent
 
 				none_count = 0
 				temp_variable_info = []
@@ -185,7 +190,15 @@ class pcl:
 					if target_row != initval_row:
 						temp_cell = self.rows[target_row][col]
 						if temp_cell.value != "None":
-							temp_variable_info.append(get_variable_info(temp_cell, parent=obj_element_info.name))
+							if not obj_element_info.is_pointer:
+								temp = []
+								for data in obj_element_info.parent:
+									temp.append(data)
+								temp.append(obj_element_info.name)
+								temp_parent = temp
+							else:
+								temp_parent = [obj_element_info.name]
+							temp_variable_info.append(get_variable_info(temp_cell, parent=temp_parent))
 						else:
 							none_count += 1
 					else:
@@ -197,7 +210,6 @@ class pcl:
 				if none_count == (current_cell.col_last - current_cell.col):
 					obj_element_info.child = None
 
-				obj_element_info.parent = parent
 				return obj_element_info
 
 
@@ -215,13 +227,22 @@ class pcl:
 				pass
 			return None
 
+		def get_extra_element_info(initval_row, current_cell):
+			
+			pass
+
 		if self.pcl_info.imp_available:
 			main_element_info = []
+			# Input factor range handle
 			for col in range(self.pcl_info.imp_first_col, self.pcl_info.imp_last_col):
 				current_cell = self.rows[1][col]
 				temp_element_info = get_element_info(self.pcl_info.initval_row, current_cell)
 				if temp_element_info:
 					main_element_info.append(temp_element_info)
+			# Output element range handle
+			for col in range(self.pcl_info.out_first_col, self.pcl_info.out_last_col):
+				current_cell = self.rows[1][col]
+				main_element_info = get_extra_element_info(self.pcl_info.initval_row, current_cell)
 			return main_element_info
 
 start = time()
