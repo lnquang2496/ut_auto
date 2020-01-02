@@ -117,7 +117,6 @@ class pcl:
 		self.rows = get_last_col(get_pcl_from_worksheet(tuple(wb[ws_name].rows)))
 		self.pcl_info = get_pcl_info(self.rows)
 		self.pcl_input_factor = self.input_factor_handle()
-		pass
 
 	def input_factor_handle(self):
 		class element_info:
@@ -131,8 +130,7 @@ class pcl:
 				self.is_array = False
 				self.parent = []
 				self.child = None
-				self.check_expected = None
-				pass
+				self.check_expected = []
 
 		def is_pointer(value):
 			with open("data/pointer.txt", "r") as f:
@@ -212,24 +210,36 @@ class pcl:
 
 				return obj_element_info
 
-
 			temp_prefix = "[a]" if "[a]" in current_cell.value else None
 			if not temp_prefix:
 				temp_prefix = "[g]" if "[g]" in current_cell.value else None
 			if temp_prefix:
 				obj_element_info = get_variable_info(current_cell, temp_prefix)
 				return obj_element_info
-			temp_prefix = "[rt]" if "[rt]" in current_cell.value else None
-			if temp_prefix:
-				pass
-			temp_prefix = "[rt]" if "[rt]" in current_cell.value else None
-			if temp_prefix:
-				pass
 			return None
 
-		def get_extra_element_info(initval_row, current_cell):
-			
-			pass
+		def get_extra_variable_info(current_cell, prefix, main_element_info:list=[]):
+			temp_cell_value = current_cell.value.replace(prefix, "")
+			temp_cell_value = temp_cell_value.replace("*", "") if "*" in temp_cell_value else temp_cell_value
+			temp_find_blank = temp_cell_value.rfind(" ")
+			while temp_find_blank == len(temp_cell_value) - 1:
+				temp_cell_value = temp_cell_value[:-1]
+				temp_find_blank = temp_cell_value.rfind(" ")
+			if temp_find_blank != -1:
+				temp_cell_value = temp_cell_value[temp_find_blank + 1 :].replace(" ", "")
+			for temp_element_info in main_element_info:
+				if temp_element_info.name == temp_cell_value:
+					for col in range (current_cell.col, current_cell.col_last):	
+						temp_extra_cell_value = self.rows[current_cell.row + 1][col]
+						temp_element_info.check_expected.append(f"{temp_element_info.name}{temp_extra_cell_value}")
+
+		def get_extra_element_info(initval_row, current_cell, main_element_info:list=[]):
+			temp_prefix = "[a]" if "[a]" in current_cell.value else None
+			if not temp_prefix:
+				temp_prefix = "[g]" if "[g]" in current_cell.value else None
+			if temp_prefix:
+				obj_element_info = get_extra_variable_info(current_cell, temp_prefix, main_element_info)
+				return obj_element_info
 
 		if self.pcl_info.imp_available:
 			main_element_info = []
@@ -242,7 +252,7 @@ class pcl:
 			# Output element range handle
 			for col in range(self.pcl_info.out_first_col, self.pcl_info.out_last_col):
 				current_cell = self.rows[1][col]
-				main_element_info = get_extra_element_info(self.pcl_info.initval_row, current_cell)
+				main_element_info = get_extra_element_info(self.pcl_info.initval_row, current_cell, main_element_info)
 			return main_element_info
 
 start = time()

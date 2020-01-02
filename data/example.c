@@ -16,6 +16,10 @@ void test_{func}(){
         int32_t * var7;
         int32_t var8;
         int32_t * var9;
+        {expected_data_declarations}
+        uint32_t expected_var3; 
+        int32_t expected_var5_0;
+        int32_t expected_var5_1;
         {return_data_declarations}
         int32_t expected_ReturnValue;
     };
@@ -69,8 +73,8 @@ void test_{func}(){
             /* Test case checks */
             {expected_data_check}
             CHECK_U_INT(var3, CURRENT_TEST.expected_var3);
-            CHECK_I_INT();
-            CHECK_
+            CHECK_S_INT(var5[0], CURRENT_TEST.expected_var5_0);
+            CHECK_S_INT(var5[1], CURRENT_TEST.expected_var5_1);
             {expected_return_check}
             CHECK_S_INT(ReturnValue , CURRENT_TEST.expected_ReturnValue);
         END_CALLS();
