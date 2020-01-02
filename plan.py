@@ -227,11 +227,13 @@ class pcl:
 				temp_find_blank = temp_cell_value.rfind(" ")
 			if temp_find_blank != -1:
 				temp_cell_value = temp_cell_value[temp_find_blank + 1 :].replace(" ", "")
-			for temp_element_info in main_element_info:
-				if temp_element_info.name == temp_cell_value:
-					for col in range (current_cell.col, current_cell.col_last):	
-						temp_extra_cell_value = self.rows[current_cell.row + 1][col]
-						temp_element_info.check_expected.append(f"{temp_element_info.name}{temp_extra_cell_value}")
+			if main_element_info:
+				for temp_element_info in main_element_info:
+					if temp_element_info.name == temp_cell_value:
+						for col in range (current_cell.col, current_cell.col_last):	
+							temp_extra_cell_value = self.rows[current_cell.row + 1][col].value
+							temp_element_info.check_expected.append(str(f"{temp_element_info.name}{temp_extra_cell_value}"))
+			return main_element_info
 
 		def get_extra_element_info(initval_row, current_cell, main_element_info:list=[]):
 			temp_prefix = "[a]" if "[a]" in current_cell.value else None
@@ -240,6 +242,7 @@ class pcl:
 			if temp_prefix:
 				obj_element_info = get_extra_variable_info(current_cell, temp_prefix, main_element_info)
 				return obj_element_info
+			return main_element_info
 
 		if self.pcl_info.imp_available:
 			main_element_info = []
